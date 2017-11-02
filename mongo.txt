@@ -1,0 +1,118 @@
+1Create a collection named orders
+
+> db.createCollection('orders');
+{ "ok" : 1 }
+
+2Insert at least 3 documents that represent an order. IMPORTANT: See section below for fields. Order dates should be: 2017-02-03, 2017-04-04, 2017-01-02
+
+> var orders = db.orders
+> orders.insert({orderDate: new ISODate('2017-02-03'), orderTotal: 0, lineItems: [{unitPrice: 0, quantity:0, productName:''}]);
+... }
+2017-11-02T13:32:42.591-0500 E QUERY    [thread1] SyntaxError: missing } after property list @(shell):1:123
+> orders.insert({orderDate: new ISODate('2017-02-03'), orderTotal: 0, lineItems:  [{unitPrice: 0, quantity:0, productName:''}]});
+WriteResult({ "nInserted" : 1 })
+> orders.find().pretty()
+{
+	"_id" : ObjectId("59fb651150088fdc0f1a1cca"),
+	"orderDate" : ISODate("2017-02-03T00:00:00Z"),
+	"orderTotal" : 0,
+	"lineItems" : [
+		{
+			"unitPrice" : 0,
+			"quantity" : 0,
+			"productName" : ""
+		}
+	]
+}
+> orders.insert({orderDate: new ISODate('2017-04-04'), orderTotal: 0, lineItems:  [{unitPrice: 0, quantity:0, productName:''}]});
+WriteResult({ "nInserted" : 1 })
+> orders.insert({orderDate: new ISODate('2017-01-02'), orderTotal: 0, lineItems:  [{unitPrice: 0, quantity:0, productName:''}]});
+WriteResult({ "nInserted" : 1 })
+
+
+
+3Find all orders and make them look pretty.
+
+
+
+
+4Find all orders with an orderDate that is after 1/31/2017.
+
+> orders.find({orderDate: {$gt: ISODate("2017-01-31")}});
+{ "_id" : ObjectId("59fb651150088fdc0f1a1cca"), "orderDate" : ISODate("2017-02-03T00:00:00Z"), "orderTotal" : 0, "lineItems" : [ { "unitPrice" : 0, "quantity" : 0, "productName" : "" } ] }
+{ "_id" : ObjectId("59fb65f950088fdc0f1a1ccb"), "orderDate" : ISODate("2017-04-04T00:00:00Z"), "orderTotal" : 0, "lineItems" : [ { "unitPrice" : 0, "quantity" : 0, "productName" : "" } ] }
+
+5Change the orderTotal from 2/3/2017 to 63 dollars (you do NOT have to ensure the lineItems' unitPrice * quantity add up to the orderTotal)
+
+> orders.update({orderDate: ISODate("2017-02-03")},{$set:{orderTotal: 67}});
+WriteResult({ "nMatched" : 1, "nUpserted" : 0, "nModified" : 1 })
+
+6Add another lineItem to the order from 4/4/2017
+
+> orders.update({orderDate: ISODate("2017-04-04")}, {$push:{"lineItems" : [ { "unitPrice" : 0, "quantity" : 0, "productName" : "" }]}});
+WriteResult({ "nMatched" : 1, "nUpserted" : 0, "nModified" : 1 })
+
+7Change the first lineItem in the order from 1/2/2017 to be for 2 'transistor radio's
+
+> orders.update({orderDate:ISODate("2017-01-02")}, {$set: {"lineItem": [{quantity:2},{productName:'transistor radios'}]}});
+WriteResult({ "nMatched" : 1, "nUpserted" : 0, "nModified" : 1 })
+
+
+8Find orders with lineItems that have a quantity that is less than 10, but greater than 2. You will have to research $elemMatch
+orders.find({lineItems:{$elemMatch:{$gt:2, $lt:10}}});
+
+
+summary:
+
+
+{
+	"_id" : ObjectId("59fb651150088fdc0f1a1cca"),
+	"orderDate" : ISODate("2017-02-03T00:00:00Z"),
+	"orderTotal" : 67,
+	"lineItems" : [
+		{
+			"unitPrice" : 0,
+			"quantity" : 0,
+			"productName" : ""
+		}
+	]
+}
+{
+	"_id" : ObjectId("59fb65f950088fdc0f1a1ccb"),
+	"orderDate" : ISODate("2017-04-04T00:00:00Z"),
+	"orderTotal" : 0,
+	"lineItems" : [
+		{
+			"unitPrice" : 0,
+			"quantity" : 0,
+			"productName" : ""
+		},
+		[
+			{
+				"unitPrice" : 0,
+				"quantity" : 0,
+				"productName" : ""
+			}
+		]
+	]
+}
+{
+	"_id" : ObjectId("59fb661c50088fdc0f1a1ccc"),
+	"orderDate" : ISODate("2017-01-02T00:00:00Z"),
+	"orderTotal" : 0,
+	"lineItems" : [
+		{
+			"unitPrice" : 0,
+			"quantity" : 0,
+			"productName" : ""
+		}
+	],
+	"lineItem" : [
+		{
+			"quantity" : 2
+		},
+		{
+			"productName" : "transistor radios"
+		}
+	]
+}
